@@ -29,4 +29,6 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+const bcrypt = require('bcryptjs');
+
 module.exports = mongoose.model('User', userSchema);
