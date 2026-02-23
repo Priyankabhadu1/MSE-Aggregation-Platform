@@ -69,7 +69,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID !== 'your-googl
         user = await User.create({
           googleId: profile.id,
           name: profile.displayName,
-          email: profile.emails[0].value
+          email: profile.emails[0].value,
+          avatar: profile.photos[0]?.value || ''
         });
         return done(null, user);
       } catch (err) {
