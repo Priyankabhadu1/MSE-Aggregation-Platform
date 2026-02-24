@@ -1,134 +1,677 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · MSE Connect</title>
+  <!-- Google Fonts & Chart.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ----- GLOBAL VARIABLES (match login theme) ----- */
+    :root {
+      --saffron: #FF6B35;
+      --deep-navy: #0D1B2A;
+      --teal: #00897B;
+      --teal-light: #00BFA5;
+      --gold: #FFB300;
+      --cream: #FFF8F0;
+      --text-main: #1a1a2e;
+      --text-muted: #6b7280;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --sidebar-width: 260px;
+      --header-height: 70px;
+      --shadow-sm: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,20,10,0.05);
+      --shadow-hover: 0 20px 30px -10px rgba(0,100,80,0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 48px 36px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.15);
-      text-align: center;
-    }
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: 700;
-      margin: 0 auto 20px;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--deep-navy);
+      color: var(--text-main);
+      height: 100vh;
       overflow: hidden;
     }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    h1 {
-      font-size: 26px;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .email {
-      color: #888;
-      font-size: 14px;
-      margin-bottom: 30px;
-    }
-    .info-box {
-      background: #f7f8fc;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 28px;
-      text-align: left;
-    }
-    .info-box h3 {
-      font-size: 14px;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-    .info-row {
+
+    /* ----- DASHBOARD LAYOUT (sidebar navy + main cream) ----- */
+    .dashboard-container {
       display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
+      height: 100%;
+      width: 100%;
+      animation: fadeIn 0.6s ease;
+    }
+
+    /* ---------- SIDEBAR (deep navy, same as left panel) ---------- */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--deep-navy);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 16px 20px;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 8px 0 30px rgba(0,0,0,0.3);
+      z-index: 10;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--teal) var(--deep-navy);
+    }
+    .sidebar::-webkit-scrollbar { width: 5px; }
+    .sidebar::-webkit-scrollbar-track { background: var(--deep-navy); }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 20px; }
+
+    /* decorative particles (inherited from login) */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 70% at 30% 20%, rgba(0,137,123,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      padding-left: 8px;
+      position: relative;
+      z-index: 2;
+      animation: slideDown 0.5s;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+    .brand-icon svg { width: 22px; height: 22px; fill: white; }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: white;
+      letter-spacing: 0.02em;
+    }
+    .brand-name span { color: var(--gold); }
+
+    /* user role chip */
+    .role-chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,179,0,0.2);
+      border-radius: 40px;
+      padding: 8px 14px;
+      margin: 0 0 28px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+    }
+    .role-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.5; } }
+
+    /* navigation menu */
+    .nav-menu {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      z-index: 2;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: rgba(255,255,255,0.65);
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(0,137,123,0.2) 0%, rgba(0,191,165,0.1) 100%);
+      color: white;
+      border-left: 3px solid var(--gold);
+    }
+    .nav-item:not(.active):hover {
+      background: rgba(255,255,255,0.03);
+      color: white;
+      transform: translateX(5px);
+    }
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .user-profile {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--teal), #004D40);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+    .user-info {
+      flex:1;
+    }
+    .user-name {
+      color: white;
+      font-weight: 600;
       font-size: 14px;
     }
-    .info-row:last-child { border-bottom: none; }
-    .info-row span:first-child { color: #666; }
-    .info-row span:last-child { color: #333; font-weight: 600; }
-    .btn-logout {
-      display: inline-block;
-      padding: 12px 36px;
-      background: #f44336;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: transform .15s, box-shadow .15s;
+    .user-email {
+      color: rgba(255,255,255,0.45);
+      font-size: 11px;
     }
-    .btn-logout:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(244,67,54,.3);
+    .logout-link {
+      color: var(--gold);
+      font-size: 12px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .logout-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ---------- MAIN CONTENT (cream) ---------- */
+    .main-content {
+      flex: 1;
+      background: var(--cream);
+      overflow-y: auto;
+      padding: 24px 32px;
+      position: relative;
+    }
+    /* subtle background ornament */
+    .main-content::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,107,53,0.04), transparent 80%);
+      pointer-events: none;
+    }
+
+    /* header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      animation: slideUp 0.5s 0.1s both;
+    }
+    .header-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-left h2 span {
+      background: linear-gradient(90deg, var(--saffron), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .header-left p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .notification-badge {
+      position: relative;
+      cursor: pointer;
+    }
+    .notification-badge svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--text-main);
+      stroke-width: 1.8;
+    }
+    .badge-dot {
+      position: absolute;
+      top: -2px;
+      right: -3px;
+      width: 8px;
+      height: 8px;
+      background: var(--saffron);
+      border-radius: 50%;
+      border: 2px solid var(--cream);
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 40px;
+      padding: 5px 5px 5px 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .search-bar input {
+      border: none;
+      background: transparent;
+      padding: 7px 0;
+      font-size: 14px;
+      width: 180px;
+      outline: none;
+    }
+    .search-bar button {
+      background: var(--teal);
+      border: none;
+      border-radius: 30px;
+      padding: 8px 16px;
+      color: white;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .search-bar button:hover { background: #00695c; transform: scale(0.98); }
+
+    /* widgets grid */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 20px 18px;
+      border-radius: 22px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.02);
+      animation: cardPop 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+      animation-delay: calc(0.05s * var(--i, 1));
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .stat-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-main);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.2;
+    }
+    .stat-trend {
+      font-size: 12px;
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 6px;
+    }
+
+    /* two column layout for charts & lists */
+    .row-duo {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,0.02);
+      transition: box-shadow 0.3s;
+      animation: slideUp 0.5s both;
+    }
+    .card:hover { box-shadow: var(--shadow-hover); }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .card-header a {
+      color: var(--teal);
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* chart container */
+    .chart-container { height: 200px; width: 100%; }
+
+    /* matchmaking horizontal scroll */
+    .match-list {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+    .match-card {
+      min-width: 160px;
+      background: #faf7f2;
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid var(--border);
+    }
+    .match-card h4 { font-size: 15px; }
+    .match-card .tag {
+      background: var(--teal-light);
+      color: white;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin: 8px 0 4px;
+    }
+
+    /* inventory alert list */
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .alert-item:last-child { border: none; }
+    .stock-low { color: var(--saffron); font-weight: 600; }
+
+    /* loyalty bar */
+    .loyalty-bar {
+      background: linear-gradient(90deg, var(--gold), #ffd966);
+      height: 8px;
+      border-radius: 20px;
+      width: 70%;
+      margin: 12px 0;
+    }
+
+    /* animations */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardPop { 0% { opacity:0; transform: scale(0.96); } 100% { opacity:1; transform: scale(1); } }
+
+    /* responsiveness */
+    @media (max-width: 1100px) {
+      .widget-grid { grid-template-columns: repeat(2, 1fr); }
+      .row-duo { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main-content { padding: 16px; }
     }
   </style>
 </head>
 <body>
-      <div class="card">
-    <div class="avatar">
-      <% if (user.avatar) { %>
-        <img src="<%= user.avatar %>" alt="avatar" />
-      <% } else { %>
-        <%= user.name.charAt(0).toUpperCase() %>
-      <% } %>
-    </div>
+  <div class="dashboard-container">
 
-    <h1>Hello, <%= user.name %>!</h1>
-    <p class="email"><%= user.email %></p>
+    <!-- SIDEBAR (navy / gold theme) -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="brand-name">MSE<span>Connect</span></div>
+      </div>
 
-    <div class="info-box">
-      <h3>Account Details</h3>
-      <div class="info-row">
-        <span>Name</span>
-        <span><%= user.name %></span>
+      <!-- role chip with dynamic role -->
+      <div class="role-chip">
+        <span class="dot"></span>
+        <span>Logged in as <strong><%= user.role === 'seller' ? 'Seller' : 'Buyer' %></strong></span>
       </div>
-      <div class="info-row">
-        <span>Email</span>
-        <span><%= user.email %></span>
-      </div>
-      <div class="info-row">
-        <span>Login Method</span>
-        <span><%= user.googleId ? 'Google' : 'Email & Password' %></span>
-      </div>
-      <div class="info-row">
-        <span>Joined</span>
-        <span><%= new Date(user.createdAt).toLocaleDateString() %></span>
-      </div>
-    </div>
 
-    <a href="/logout" class="btn-logout">Sign Out</a>
+      <div class="nav-menu">
+        <a href="/dashboard" class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="/inventory-twin" class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M12 22V12"/><path d="M9 10.5l3-1.5 3 1.5"/></svg>
+          <span>Inventory Twin</span>
+        </a>
+        <a href="/demand-forecast" class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><line x1="2" y1="20" x2="2.01" y2="20"/></svg>
+          <span>Demand Forecast</span>
+        </a>
+        <a href="/matchmaking" class="nav-item">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span>Matchmaking</span>
+        </a>
+        <a href="/logistics" class="nav-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Logistics</span>
+        </a>
+        <a href="/crm" class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10.5"/><polyline points="16 2 22 8 16 8"/><line x1="10" y1="14" x2="21" y2="14"/><line x1="10" y1="18" x2="18" y2="18"/></svg>
+          <span>CRM / Loyalty</span>
+        </a>
+        <a href="/payments" class="nav-item">
+          <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M22 10h-6"/></svg>
+          <span>Payments & Subsidy</span>
+        </a>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+        <div class="user-info">
+          <div class="user-name"><%= user.name %></div>
+          <div class="user-email"><%= user.email %></div>
+          <a href="/logout" class="logout-link">Logout</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT (cream) -->
+    <main class="main-content">
+      <!-- header -->
+      <div class="header">
+        <div class="header-left">
+          <h2>Welcome back, <span><%= user.name.split(' ')[0] %></span></h2>
+          <p>📍 District: Jaipur · ODOP: Blue Pottery · last sync 2 min ago</p>
+        </div>
+        <div class="header-right">
+          <div class="notification-badge">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="badge-dot"></span>
+          </div>
+          <div class="search-bar">
+            <input type="text" placeholder="Search orders, products...">
+            <button>🔍</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT CARDS (dynamic based on role) -->
+      <div class="widget-grid">
+        <% if (user.role === 'seller') { %>
+          <div class="stat-card" style="--i:1;"><div class="stat-title">Active Listings</div><div class="stat-value">43</div><div class="stat-trend">↑ 12 new this week</div></div>
+          <div class="stat-card" style="--i:2;"><div class="stat-title">Orders to fulfill</div><div class="stat-value">18</div><div class="stat-trend">JIT scheduled: 14</div></div>
+          <div class="stat-card" style="--i:3;"><div class="stat-title">Revenue (MTD)</div><div class="stat-value">₹4.2L</div><div class="stat-trend">↑ 23% vs last month</div></div>
+          <div class="stat-card" style="--i:4;"><div class="stat-title">Loyalty points</div><div class="stat-value">2,450</div><div class="stat-trend">Gold tier</div></div>
+        <% } else { %>
+          <div class="stat-card" style="--i:1;"><div class="stat-title">Open RFQs</div><div class="stat-value">8</div><div class="stat-trend">3 new quotes</div></div>
+          <div class="stat-card" style="--i:2;"><div class="stat-title">Active orders</div><div class="stat-value">12</div><div class="stat-trend">2 shipments today</div></div>
+          <div class="stat-card" style="--i:3;"><div class="stat-title">Saved suppliers</div><div class="stat-value">31</div><div class="stat-trend">8 ODOP verified</div></div>
+          <div class="stat-card" style="--i:4;"><div class="stat-title">Subsidy claimed</div><div class="stat-value">₹87K</div><div class="stat-trend">GeM integrated</div></div>
+        <% } %>
+      </div>
+
+      <!-- ROW: DEMAND FORECAST (chart) + MATCHMAKING (vertical) -->
+      <div class="row-duo">
+        <!-- Demand forecast card (AI) -->
+        <div class="card">
+          <div class="card-header"><h3>📈 AI Demand Forecast · Jaipur (Blue Pottery)</h3><a href="/demand-forecast">details →</a></div>
+          <div class="chart-container">
+            <canvas id="demandChart"></canvas>
+          </div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">🔮 Next week: +18% · restock recommendation: 240 units</p>
+        </div>
+
+        <!-- Roster / Matchmaking card (changes with role) -->
+        <div class="card">
+          <div class="card-header"><h3><%= user.role === 'seller' ? '🤝 Recommended Buyers' : '🏭 Top Matched Suppliers' %></h3><a href="/matchmaking">view all</a></div>
+          <div class="match-list">
+            <% if (user.role === 'seller') { %>
+              <div class="match-card"><h4>Jaipur Handicrafts</h4><span class="tag">Export ready</span><p>⚡ 4.8 ★ (200+ orders)</p></div>
+              <div class="match-card"><h4>FabIndia B2B</h4><span class="tag">ODOP</span><p>⚡ 4.9 ★ · bulk buyer</p></div>
+              <div class="match-card"><h4>GeM Buyer</h4><span class="tag">Govt. tender</span><p>📦 pottery required</p></div>
+            <% } else { %>
+              <div class="match-card"><h4>Neeraj Potteries</h4><span class="tag">ODOP</span><p>⭐ 4.7 · 5km away</p></div>
+              <div class="match-card"><h4>Kumbhar MSE</h4><span class="tag">JIT enabled</span><p>⭐ 4.9 · low stock alert</p></div>
+              <div class="match-card"><h4>Blue Pottery Hub</h4><span class="tag">GeM seller</span><p>🚚 2-day dispatch</p></div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECOND ROW: INVENTORY TWIN + LOGISTICS / CRM -->
+      <div class="row-duo">
+        <!-- Digital Twin Inventory -->
+        <div class="card">
+          <div class="card-header"><h3>📦 Digital Twin Inventory (simulated)</h3><a href="/inventory-twin">simulate scenario</a></div>
+          <div class="alert-item"><span>Blue pottery - medium</span><span class="stock-low">⚠️ 8 units (below safety)</span></div>
+          <div class="alert-item"><span>Terracotta lamps</span><span>42 units · optimal</span></div>
+          <div class="alert-item"><span>Textile saris (ODOP)</span><span class="stock-low">⚠️ 12 units, reorder point 20</span></div>
+          <div class="alert-item"><span>Brass decor</span><span>forecast +32% · restock soon</span></div>
+          <div style="margin-top:12px; background:#eef5f4; padding:8px; border-radius:12px; font-size:13px;">🔄 twin suggests: increase pottery by 15% for festive demand</div>
+        </div>
+
+        <!-- Logistics & CRM combined card -->
+        <div class="card">
+          <div class="card-header"><h3>🚚 Logistics · JIT tracking</h3><a href="/logistics">live fleet</a></div>
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
+            <span style="background:var(--teal-light); color:white; padding:2px 12px; border-radius:40px;">today 5 deliveries</span>
+            <span>🚛 partner: Delhivery, Shadowfax</span>
+          </div>
+          <div class="alert-item"><span>Order #M212 to FabIndia</span><span>out for delivery (JIT)</span></div>
+          <div class="alert-item"><span>#M218 to GeM warehouse</span><span>scheduled 3pm</span></div>
+          <div class="alert-item"><span>#M205 (Blue Pottery)</span><span>delayed 20min ⚠️</span></div>
+          <div style="margin-top:16px;">
+            <div class="card-header" style="margin-bottom:4px;"><h4>⭐ CRM Loyalty</h4><a href="/crm">view</a></div>
+            <div class="loyalty-bar"></div>
+            <p style="font-size:13px;">You have 2,450 pts · next reward at 3,000 (priority listing)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- payment / subsidy row (simple) -->
+      <div class="card" style="margin-top:8px;">
+        <div class="card-header"><h3>💳 Payment & Subsidy (Aadhaar-linked)</h3><a href="/payments">claim</a></div>
+        <div style="display:flex; gap:30px; flex-wrap:wrap;">
+          <div><span style="color:var(--text-muted);">UPI / wallet</span><br><strong>₹84,200 available</strong></div>
+          <div><span style="color:var(--text-muted);">Subsidy (GeM)</span><br><strong>₹22,000 disbursed Jan</strong></div>
+          <div><span style="color:var(--text-muted);">ODOP incentive</span><br><strong>2 pending</strong></div>
+        </div>
+      </div>
+    </main>
   </div>
+
+  <!-- CHART INIT SCRIPT -->
+  <script>
+    (function() {
+      const ctx = document.getElementById('demandChart')?.getContext('2d');
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'forecast (units)',
+            data: [65, 72, 80, 78, 92, 115, 134],
+            borderColor: '#00897B',
+            backgroundColor: 'rgba(0,137,123,0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#FFB300',
+            pointBorderColor: '#fff',
+            borderWidth: 3,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, grid: { color: '#e0e0e0' } } }
+        }
+      });
+    })();
+
+    // micro-interactions
+    document.querySelectorAll('.stat-card, .card').forEach(c => {
+      c.addEventListener('mouseenter', () => c.style.transition = 'transform 0.25s ease, box-shadow 0.3s');
+    });
+  </script>
+  <!-- subtle floating particles (reuse from login) -->
+  <style>
+    .main-content {
+      background-image: radial-gradient(circle at 90% 10%, rgba(255,107,53,0.02) 0%, transparent 30%),
+        radial-gradient(circle at 10% 90%, rgba(255,179,0,0.02) 0%, transparent 40%);
+    }
+  </style>
 </body>
 </html>
