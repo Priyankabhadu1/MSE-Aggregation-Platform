@@ -1,0 +1,63 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+  <h1>⭐ My Performance Ratings</h1>
+</div>
+
+<% if (ratings && ratings.length > 0) { 
+  const avgRating = ratings.reduce((sum, r) => sum + r.overallRating, 0) / ratings.length;
+%>
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+      <div>
+        <h3>Overall Rating</h3>
+        <p style="font-size: 48px; font-weight: bold;"><%= avgRating.toFixed(1) %> / 5.0</p>
+      </div>
+      <div>
+        <p>Based on <%= ratings.length %> review(s)</p>
+        <div style="font-size: 24px;">
+          <% for (let i = 1; i <= 5; i++) { %>
+            <%= i <= Math.round(avgRating) ? '⭐' : '☆' %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Timeliness</th>
+          <th>Quality</th>
+          <th>Communication</th>
+          <th>Overall</th>
+          <th>Comment</th>
+          <th>Rated On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% ratings.forEach(rating => { %>
+          <tr>
+            <td><%= rating.orderId.description.substring(0, 40) %>...</td>
+            <td><%= rating.timelinessScore %>/5</td>
+            <td><%= rating.qualityScore %>/5</td>
+            <td><%= rating.communicationScore ? rating.communicationScore + '/5' : '-' %></td>
+            <td><strong><%= rating.overallRating.toFixed(1) %></strong></td>
+            <td><%= rating.comment || '-' %></td>
+            <td><%= rating.createdAt.toDateString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="empty-state-full">
+    <p>You haven't received any ratings yet.</p>
+    <p>Complete your approved orders on time with good quality to earn ratings.</p>
+    <a href="/mse/selections/my" class="btn btn-primary" style="margin-top: 15px;">View My Selections</a>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

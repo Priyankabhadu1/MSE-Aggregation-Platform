@@ -1,0 +1,58 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>📋 My Selections</h1>
+  <a href="/mse/orders/open" class="btn btn-primary">+ Browse New Orders</a>
+</div>
+
+<% if (selections.length > 0) { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Selected Quantity</th>
+          <th>Total Value</th>
+          <th>Status</th>
+          <th>Admin Approved</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% selections.forEach(sel => { %>
+          <tr>
+            <td><%= sel.orderId.description.substring(0, 50) %>...</td>
+            <td><%= sel.selectedQuantity.toLocaleString() %> units</td>
+            <td><strong>₹<%= (sel.selectedQuantity * sel.orderId.pricePerUnit).toLocaleString() %></strong></td>
+            <td>
+              <span class="badge badge-<%= sel.status %>">
+                <%= sel.status.charAt(0).toUpperCase() + sel.status.slice(1) %>
+              </span>
+            </td>
+            <td><%= sel.adminApprovedAt ? sel.adminApprovedAt.toDateString() : '-' %></td>
+            <td>
+              <% if (sel.status === 'approved') { %>
+                <form action="/mse/selections/<%= sel._id %>/complete?_method=PUT" method="POST">
+                  <button type="submit" class="btn btn-small btn-success" onclick="return confirm('Mark this order as completed?')">✓ Mark Complete</button>
+                </form>
+              <% } else if (sel.status === 'completed') { %>
+                <span class="badge badge-completed">✓ Completed</span>
+              <% } else if (sel.status === 'rejected') { %>
+                <span class="badge badge-rejected">✗ Rejected</span>
+              <% } else { %>
+                <span class="badge badge-pending">⏳ Pending</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="empty-state-full">
+    <p>You haven't placed any selections yet.</p>
+    <a href="/mse/orders/open" class="btn btn-primary" style="margin-top: 15px;">Browse Open Orders</a>
+  </div>
+<% } %>
+
+<%- include('../../partials/footer') %>

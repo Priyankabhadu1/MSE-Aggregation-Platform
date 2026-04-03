@@ -1,0 +1,175 @@
+<%- include('../partials/header') %>
+
+<div class="dashboard-header">
+  <h1>MSE Dashboard</h1>
+  <p>Welcome, <%= user.businessName || user.name %>! Track your orders and manage your business.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>📋 Pending Selections</h3>
+    <div class="stat-number">
+      <% 
+        let pendingCount = 0;
+        if (selections && selections.length > 0) {
+          pendingCount = selections.filter(s => s.status === 'pending').length;
+        }
+      %>
+      <%= pendingCount %>
+    </div>
+    <a href="/mse/selections/my" class="btn btn-small btn-primary">View Details</a>
+  </div>
+  
+  <div class="stat-card">
+    <h3>✅ Approved Selections</h3>
+    <div class="stat-number">
+      <% 
+        let approvedCount = 0;
+        if (selections && selections.length > 0) {
+          approvedCount = selections.filter(s => s.status === 'approved').length;
+        }
+      %>
+      <%= approvedCount %>
+    </div>
+    <a href="/mse/selections/my" class="btn btn-small btn-primary">View Details</a>
+  </div>
+  
+  <div class="stat-card">
+    <h3>🎯 Completed Orders</h3>
+    <div class="stat-number">
+      <% 
+        let completedCount = 0;
+        if (selections && selections.length > 0) {
+          completedCount = selections.filter(s => s.status === 'completed').length;
+        }
+      %>
+      <%= completedCount %>
+    </div>
+    <a href="/mse/selections/my" class="btn btn-small btn-primary">View Details</a>
+  </div>
+</div>
+
+<section style="margin-top: 30px;">
+  <h2>📦 My Recent Selections</h2>
+  
+  <% if (selections && selections.length > 0) { %>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order Description</th>
+            <th>Quantity</th>
+            <th>Total Value</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% selections.slice(0, 5).forEach(sel => { %>
+            <tr>
+              <td>
+                <%= sel.orderId.description.substring(0, 60) %>
+                <%= sel.orderId.description.length > 60 ? '...' : '' %>
+              </td>
+              <td><%= sel.selectedQuantity.toLocaleString() %> units</td>
+              <td>₹<%= (sel.selectedQuantity * sel.orderId.pricePerUnit).toLocaleString() %></td>
+              <td>
+                <span class="badge badge-<%= sel.status %>">
+                  <%= sel.status.toUpperCase() %>
+                </span>
+              </td>
+              <td>
+                <% if (sel.status === 'approved') { %>
+                  <form action="/mse/selections/<%= sel._id %>/complete?_method=PUT" method="POST">
+                    <button type="submit" class="btn btn-small btn-success" onclick="return confirm('Mark this order as completed?')">
+                      ✓ Mark Complete
+                    </button>
+                  </form>
+                <% } else if (sel.status === 'completed') { %>
+                  <span class="badge badge-completed">✓ Completed</span>
+                <% } else if (sel.status === 'pending') { %>
+                  <span class="badge badge-pending">⏳ Awaiting Approval</span>
+                <% } else if (sel.status === 'rejected') { %>
+                  <span class="badge badge-rejected">✗ Rejected</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    
+    <% if (selections.length > 5) { %>
+      <div style="text-align: center; margin-top: 15px;">
+        <a href="/mse/selections/my" class="btn btn-primary">View All Selections →</a>
+      </div>
+    <% } %>
+    
+  <% } else { %>
+    <div class="empty-state">
+      <p>You haven't placed any selections yet.</p>
+      <a href="/mse/orders/open" class="btn btn-primary" style="margin-top: 15px; display: inline-block;">Browse Open Orders</a>
+    </div>
+  <% } %>
+</section>
+
+<section style="margin-top: 40px;">
+  <h2>⭐ My Ratings</h2>
+  
+  <% if (ratings && ratings.length > 0) { 
+    const avgRating = ratings.reduce((sum, r) => sum + r.overallRating, 0) / ratings.length;
+  %>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div>
+          <strong>Overall Rating:</strong>
+          <span style="font-size: 24px; font-weight: bold; color: #f39c12;">
+            <%= avgRating.toFixed(1) %> / 5.0
+          </span>
+        </div>
+        <div>
+          Based on <%= ratings.length %> review(s)
+        </div>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Timeliness</th>
+            <th>Quality</th>
+            <th>Overall</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% ratings.slice(0, 3).forEach(rating => { %>
+            <tr>
+              <td><%= rating.orderId.description.substring(0, 40) %>...</td>
+              <td><%= rating.timelinessScore %>/5</td>
+              <td><%= rating.qualityScore %>/5</td>
+              <td><strong><%= rating.overallRating.toFixed(1) %></strong></td>
+              <td><%= rating.comment || '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    
+    <% if (ratings.length > 3) { %>
+      <div style="text-align: center; margin-top: 15px;">
+        <a href="/mse/ratings" class="btn btn-secondary">View All Ratings →</a>
+      </div>
+    <% } %>
+    
+  <% } else { %>
+    <div class="empty-state">
+      <p>No ratings received yet.</p>
+      <p style="font-size: 14px; margin-top: 10px;">Complete your approved orders to get rated by admin.</p>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

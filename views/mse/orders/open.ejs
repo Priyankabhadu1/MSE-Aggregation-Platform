@@ -1,0 +1,38 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>📦 Open Orders</h1>
+  <p>Browse available orders and submit your bid</p>
+</div>
+
+<% if (orders.length > 0) { %>
+  <div class="orders-grid">
+    <% orders.forEach(order => { %>
+      <div class="order-card">
+        <h3><%= order.description.substring(0, 50) %><%= order.description.length > 50 ? '...' : '' %></h3>
+        <div class="order-details">
+          <p><strong>Total Quantity:</strong> <%= order.totalQuantity.toLocaleString() %> units</p>
+          <p><strong>Price per Unit:</strong> ₹<%= order.pricePerUnit.toLocaleString() %></p>
+          <p><strong>Total Value:</strong> <strong>₹<%= (order.totalQuantity * order.pricePerUnit).toLocaleString() %></strong></p>
+          <p><strong>Deadline:</strong> <%= order.deadline.toDateString() %></p>
+          
+          <form action="/mse/selections" method="POST" style="margin-top: 15px;">
+            <input type="hidden" name="orderId" value="<%= order._id %>">
+            <div class="form-group">
+              <label for="qty_<%= order._id %>">Quantity you can supply:</label>
+              <input type="number" id="qty_<%= order._id %>" name="selectedQuantity" min="1" max="<%= order.totalQuantity %>" required placeholder="Enter quantity">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit Bid</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <div class="empty-state-full">
+    <p>No open orders available at the moment.</p>
+    <p>Check back later for new opportunities.</p>
+  </div>
+<% } %>
+
+<%- include('../../partials/footer') %>
