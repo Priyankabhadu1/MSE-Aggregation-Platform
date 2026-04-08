@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+
+<div class="dashboard-header">
+  <h1>Admin Dashboard</h1>
+  <p>Welcome back, <%= user.name %>! Manage orders, approve MSEs, and track performance.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>Pending MSEs</h3>
+    <div class="stat-number"><%= pendingMSEs.length %></div>
+    <a href="/admin/mse/pending" class="btn btn-small btn-primary">Review</a>
+  </div>
+  <div class="stat-card">
+    <h3>Pending Selections</h3>
+    <div class="stat-number"><%= pendingSelections.length %></div>
+    <a href="/admin/selections/pending" class="btn btn-small btn-primary">Approve</a>
+  </div>
+  <div class="stat-card">
+    <h3>Total Orders</h3>
+    <div class="stat-number"><%= orders.length %></div>
+    <a href="/admin/orders" class="btn btn-small btn-primary">View All</a>
+  </div>
+</div>
+
+<div class="admin-actions">
+  <a href="/admin/orders/create" class="btn btn-primary">+ Create New Order</a>
+  <a href="/admin/mse/pending" class="btn btn-secondary">Pending MSE Approvals</a>
+  <a href="/admin/selections/pending" class="btn btn-secondary">Pending Selections</a>
+</div>
+
+<section class="completed-section">
+  <h2>✅ Completed Selections (Ready for Rating)</h2>
+  <% if (completedSelections && completedSelections.length) { %>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr><th>Order</th><th>MSE</th><th>Quantity</th><th>Completed At</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <% completedSelections.forEach(sel => { %>
+            <tr>
+              <td><%= sel.orderId.description.substring(0, 50) %>...</td>
+              <td><%= sel.mseId.businessName %></td>
+              <td><%= sel.selectedQuantity.toLocaleString() %></td>
+              <td><%= sel.completedAt ? sel.completedAt.toDateString() : '-' %></td>
+              <td>
+                <a href="/admin/ratings/<%= sel._id %>" class="btn btn-small btn-success">Give Rating</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">No completed selections yet.</div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

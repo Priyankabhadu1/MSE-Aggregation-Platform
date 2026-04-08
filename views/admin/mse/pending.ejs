@@ -1,0 +1,46 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Pending MSE Registrations</h1>
+  <a href="/admin/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<% if (mses.length > 0) { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Business Name</th>
+          <th>Contact Person</th>
+          <th>Email</th>
+          <th>Registration ID</th>
+          <th>Registered On</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% mses.forEach(mse => { %>
+          <tr>
+            <td><strong><%= mse.businessName %></strong></td>
+            <td><%= mse.name %></td>
+            <td><%= mse.email %></td>
+            <td><code><%= mse.registrationId %></code></td>
+            <td><%= mse.createdAt.toDateString() %></td>
+            <td>
+              <form action="/admin/mse/<%= mse._id %>/approve?_method=PUT" method="POST">
+                <button type="submit" class="btn btn-small btn-success">✅ Approve Business</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="empty-state-full">
+    <p>No pending MSE registrations.</p>
+    <a href="/admin/dashboard" class="btn btn-primary" style="margin-top: 15px;">Go to Dashboard</a>
+  </div>
+<% } %>
+
+<%- include('../../partials/footer') %>

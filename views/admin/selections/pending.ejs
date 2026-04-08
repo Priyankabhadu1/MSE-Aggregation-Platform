@@ -1,0 +1,52 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Pending Selections</h1>
+  <a href="/admin/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<% if (selections.length > 0) { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>MSE Business</th>
+          <th>Requested Quantity</th>
+          <th>Total Value</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% selections.forEach(sel => { %>
+          <tr>
+            <td><strong><%= sel.orderId.description.substring(0, 40) %>...</strong><br>
+                <small>Deadline: <%= sel.orderId.deadline.toDateString() %></small>
+            </td>
+            <td>
+              <strong><%= sel.mseId.businessName %></strong><br>
+              <small><%= sel.mseId.name %></small>
+            </td>
+            <td><%= sel.selectedQuantity.toLocaleString() %> units</td>
+            <td><strong>₹<%= (sel.selectedQuantity * sel.orderId.pricePerUnit).toLocaleString() %></strong></td>
+            <td class="action-buttons">
+              <form action="/admin/selections/<%= sel._id %>/approve?_method=PUT" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-small btn-success">✅ Approve</button>
+              </form>
+              <form action="/admin/selections/<%= sel._id %>/reject?_method=PUT" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Reject this selection?')">❌ Reject</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="empty-state-full">
+    <p>No pending selections to review.</p>
+    <a href="/admin/dashboard" class="btn btn-primary" style="margin-top: 15px;">Go to Dashboard</a>
+  </div>
+<% } %>
+
+<%- include('../../partials/footer') %>

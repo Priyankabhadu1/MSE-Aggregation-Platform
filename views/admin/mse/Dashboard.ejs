@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+
+<div class="dashboard-header">
+  <h1>MSE Dashboard</h1>
+  <p>Welcome, <%= user.businessName || user.name %>! Browse orders, track your selections, and grow your business.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>Open Orders</h3>
+    <div class="stat-number"><%= selections.filter(s => s.status === 'pending').length %></div>
+    <a href="/mse/orders/open" class="btn btn-small btn-primary">Browse</a>
+  </div>
+  <div class="stat-card">
+    <h3>Approved Selections</h3>
+    <div class="stat-number"><%= selections.filter(s => s.status === 'approved').length %></div>
+    <a href="/mse/selections/my" class="btn btn-small btn-primary">View</a>
+  </div>
+  <div class="stat-card">
+    <h3>Completed Orders</h3>
+    <div class="stat-number"><%= selections.filter(s => s.status === 'completed').length %></div>
+  </div>
+</div>
+
+<section>
+  <h2>📦 My Recent Selections</h2>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr><th>Order</th><th>Quantity</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <% selections.slice(0,5).forEach(sel => { %>
+          <tr>
+            <td><%= sel.orderId.description.substring(0, 50) %>...</td>
+            <td><%= sel.selectedQuantity.toLocaleString() %></td>
+            <td><span class="badge badge-<%= sel.status %>"><%= sel.status %></span></td>
+            <td>
+              <% if (sel.status === 'approved') { %>
+                <form action="/mse/selections/<%= sel._id %>/complete?_method=PUT" method="POST" style="display:inline">
+                  <button type="submit" class="btn btn-small btn-success" onclick="return confirm('Mark this as completed?')">Mark Complete</button>
+                </form>
+              <% else if (sel.status === 'completed') { %>
+                <span class="badge badge-completed">✓ Completed</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (selections.length === 0) { %>
+          <tr>
+            <td colspan="4" class="empty-state">No selections yet. <a href="/mse/orders/open">Browse open orders</a></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,66 @@
+<%- include('../../partials/header') %>
+
+<div class="form-container">
+  <div class="auth-card">
+    <h2>Rate MSE Performance</h2>
+    <p class="subtitle">Provide feedback for <%= selection.mseId.businessName %></p>
+    
+    <div style="background: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <p><strong>Order:</strong> <%= selection.orderId.description %></p>
+      <p><strong>Quantity Completed:</strong> <%= selection.selectedQuantity.toLocaleString() %> units</p>
+      <p><strong>Deadline:</strong> <%= selection.orderId.deadline.toDateString() %></p>
+    </div>
+    
+    <form action="/admin/ratings" method="POST">
+      <input type="hidden" name="selectionId" value="<%= selection._id %>">
+      
+      <div class="form-group">
+        <label for="timelinessScore">Timeliness (1-5) *</label>
+        <select id="timelinessScore" name="timelinessScore" required>
+          <option value="">Select rating</option>
+          <option value="1">1 - Very Late</option>
+          <option value="2">2 - Late</option>
+          <option value="3">3 - On Time</option>
+          <option value="4">4 - Early</option>
+          <option value="5">5 - Very Early</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="qualityScore">Quality (1-5) *</label>
+        <select id="qualityScore" name="qualityScore" required>
+          <option value="">Select rating</option>
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Below Average</option>
+          <option value="3">3 - Average</option>
+          <option value="4">4 - Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="communicationScore">Communication (1-5) - Optional</label>
+        <select id="communicationScore" name="communicationScore">
+          <option value="">Select rating (optional)</option>
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Below Average</option>
+          <option value="3">3 - Average</option>
+          <option value="4">4 - Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="comment">Comments (Optional)</label>
+        <textarea id="comment" name="comment" rows="3" placeholder="Share specific feedback about the MSE's performance..."></textarea>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button type="submit" class="btn btn-primary">Submit Rating</button>
+        <a href="/admin/dashboard" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../../partials/footer') %>
