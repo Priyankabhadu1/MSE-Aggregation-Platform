@@ -3,7 +3,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 RUN apk add --no-cache wget
-
+# This section installs dependencies
 COPY package*.json ./
 RUN npm install
 
