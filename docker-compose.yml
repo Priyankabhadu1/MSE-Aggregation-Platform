@@ -1,16 +1,6 @@
 version: "3.8"
 
 services:
-  # ── MongoDB ──
-  mongo:
-    image: mongo:7
-    container_name: loginpage-mongo
-    restart: unless-stopped
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo-data:/data/db
-
   # ── Node.js App ──
   app:
     build: .
@@ -18,8 +8,6 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    depends_on:
-      - mongo
     environment:
       PORT: 3000
       MONGODB_URI: ${MONGODB_URI}
