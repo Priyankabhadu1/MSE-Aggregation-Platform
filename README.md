@@ -1,2 +1,2 @@
 # MSE-Aggregation-Platform
-To add products 
+To help mses build there business
